@@ -5,14 +5,31 @@ import time
 import fitz  # PyMuPDF for extracting pages
 import tempfile
 
-# Set your printer name
-PRINTER_NAME = "Brother HL-L3290CDW [Wireless]"
+# List of available printers
+PRINTERS = [
+    "Brother HL-L8360CDW [Wireless]",
+    "Brother HL-L3290CDW [Wireless]"
+]
 
-def print_pdf_with_delay(pdf_path, delay=20):
+def select_printer():
+    """Prompts the user to select a printer from the available options."""
+    print("Select a printer:")
+    for i, printer in enumerate(PRINTERS, start=1):
+        print(f"{i}. {printer}")
+    
+    while True:
+        try:
+            choice = int(input("Enter the number of the printer to use: "))
+            if 1 <= choice <= len(PRINTERS):
+                return PRINTERS[choice - 1]
+            else:
+                print("Invalid selection. Please enter a valid number.")
+        except ValueError:
+            print("Invalid input. Please enter a number.")
+
+def print_pdf_with_delay(pdf_path, printer_name, delay=20):
     """Prints each page of a PDF separately with a delay using Win32 API."""
     try:
-        # Open the printer
-        printer_name = PRINTER_NAME
         print(f"Using printer: {printer_name}")
 
         # Open the PDF document
@@ -30,7 +47,7 @@ def print_pdf_with_delay(pdf_path, delay=20):
             new_doc.save(temp_path)
             new_doc.close()
 
-            print(f"Printing page {page_num + 1}...")
+            print(f"Printing page {page_num + 1} on {printer_name}...")
 
             # Open printer
             hprinter = win32print.OpenPrinter(printer_name)
@@ -57,6 +74,11 @@ def print_pdf_with_delay(pdf_path, delay=20):
         print(f"Error: {e}")
 
 if __name__ == "__main__":
-    pdf_path = r"label.pdf"
-    print_pdf_with_delay(pdf_path, delay=20)
-
+    # Let user select a printer
+    selected_printer = select_printer()
+    
+    # Define the PDF to print
+    pdf_path = r"label.pdf"  # Replace with your actual file path
+    
+    # Start printing
+    print_pdf_with_delay(pdf_path, selected_printer, delay=20)
